@@ -1,6 +1,49 @@
 {% extends 'base.html' %}
+{% load math_filters %}
 
 {% block content %}
-    <h1>Catalog of Products</h1>
-    <p>Coming Soon...</p>
+<div class="container mt-3">
+    <h1 class="text-center">Catalog of Products</h1>
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+            {% for product in products %}
+                <div class="col">
+                    <div class="card h-100 shadow-sm">
+                        <img src="{{ product.image_path|default:'https://i0.wp.com/junilearning.com/wp-content/uploads/2020/06/python-programming-language.webp?fit=800%2C800&ssl=1' }}"
+                        alt="{{product.name}}" class="card-img-top" style="width: 100px; height: 100px;">
+                        <div class="card-body">
+                            {% if not product.available %}
+                                <h5 class="card-title text-muted"> {{ product.name }}</h5>
+                            {% else %}
+                                <h5 class="card-title"> {{ product.name }}</h5>
+                            {% endif %}
+                        </div>
+                        <div>
+                            {% if product.discount %}
+                                <span class="text-success">
+                                    ${{ product.price|calculate_discount:product.discount }} 
+                                </span>
+                                <span class="text-muted text-decoration-line-through">
+                                    ${{ product.price }}
+                                </span>
+                            {% else %}
+                                <span class="text-success">
+                                    ${{ product.price }}  
+                                </span>
+                            {% endif %}
+                        </div>
+                        <div class="product-rating">
+                            {% for i in "12345" %} 
+                                {% if forloop.counter <= product.rating %}
+                                    <i class="bi bi-star-fill text-warning"></i>
+                                {% else %}
+                                    <i class="bi bi-star text-muted"></i>
+                                {% endif %} 
+                            {% endfor %}
+                        </div>
+                        <a href="{% url 'products:product_details' product.id %}" class="btn btn-primary stretched-link">More info here!</a>
+                    </div>
+                </div>
+            {% endfor %}
+    </div>
+</div>
 {% endblock %}
