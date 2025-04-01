@@ -31,6 +31,9 @@ class Product(models.Model):
     price = models.IntegerField(default=0)
     discount = models.IntegerField(default=0)
     
+    @property
+    def calculated_discount_price(self):
+        return (self.price * self.discount) / 100
     
     class Meta:
         ordering = ['-created_at']

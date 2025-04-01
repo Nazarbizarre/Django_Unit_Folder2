@@ -30,6 +30,8 @@
                         <option value="price_increasing" {% if request.GET.filter == 'price_increasing' %} selected {% endif %}>Price Increasing</option>
                         <option value="price_decreasing" {% if request.GET.filter == 'price_decreasing' %} selected {% endif %}>Price Descreasing</option>
                         <option value="rating" {% if request.GET.filter == 'rating' %} selected {% endif %}>By Rating</option>
+                        <option value="newest_first" {% if request.GET.filter == 'newest_first' %} selected {% endif %}>Newest First</option>
+                        <option value="oldest_first" {% if request.GET.filter == 'oldest_first' %} selected {% endif %}>Oldest First</option>
                     </select>
                     <input 
                     type="search" 
@@ -59,14 +61,16 @@
                     onchange="this.form.submit()"
                     value="{{ request.GET.max_price|default:'' }}"
                     />
-
                 </form>
+                <div class="navbar-nav w-100 text-end">
+                    <h4><a href="{% url 'accounts:register' %}" class="navbar-brand text-light">Register</a></h4>
+                </div>
                 </div>
             </div>
         </nav>
     </header>
 
-    <main class="container mt-5 flex-shrink-0" style="margin-top:200px;">
+    <main class="container mt-5 flex-shrink-0" style="padding-top:60px;">
         {% block content %}
             
         {% endblock %}

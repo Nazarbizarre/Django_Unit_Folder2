@@ -17,14 +17,14 @@ class Command(BaseCommand):
         
         for _ in range(50):
             Product.objects.create(name=fake.word().capitalize(), 
-                                   category=random.choice(categories_objects), 
-                                   nomenclature=fake.unique.uuid4(),
-                                   description=fake.text(max_nb_chars=100),
-                                   price = random.randint(1,100),
-                                   discount = random.randint(0,51),
-                                   stock = random.randint(1,1000),
-                                   available = random.choice([True, False]),
-                                   rating = round(random.uniform(0.1, 5.0), 1),
-                                   attributes = {"colour": fake.color_name()})
+            category=random.choice(categories_objects), 
+            nomenclature=fake.unique.uuid4(),
+            description=fake.text(max_nb_chars=100),
+            price = random.randint(1,100),
+            discount = random.randint(0,51),
+            stock = random.randint(1,1000),
+            available = random.choice([True, False]),
+            rating = round(random.uniform(0.1, 5.0), 1),
+            attributes = {"colour": fake.color_name()})
             
         self.stdout.write(self.style.SUCCESS("Successfully added 50 products!"))
