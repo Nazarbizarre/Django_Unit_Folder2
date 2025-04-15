@@ -102,10 +102,9 @@ def confirm_email(request):
         user.save()
     else:
         form_data = request.session.get('form_data')
-        if form_data:
-            form_to_save = RegisterFormNoCaptcha(form_data)
-            if form_to_save.is_valid():
-                user = form_to_save.save()
-                login(request, user)
+        form_to_save = RegisterFormNoCaptcha(form_data)
+        if form_to_save.is_valid():
+            user = form_to_save.save()
+            login(request, user)
     return render(request, "confirm_email.html", context={"email":email})
 
