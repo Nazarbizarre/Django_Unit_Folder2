@@ -62,15 +62,23 @@
                     value="{{ request.GET.max_price|default:'' }}"
                     />
                 </form>
-                <div class="navbar-nav w-100 text-end">
-                    <h4><a href="{% url 'accounts:register' %}" class="navbar-brand text-light">Register</a></h4>
                 </div>
+                <div class="nav-item text-light">
+                    <ul class="navbar-nav ms-auto">
+                {% if request.user.is_authenticated %}
+                            <li class="nav-item"><a class="nav-link text-light" href="{% url 'accounts:profile' %}">{{ request.user.username }}</a></li>
+                            <li class="nav-item"><a class="nav-link text-light" href="{% url 'accounts:logout_user' %}">Log Out</a></li>
+                {% else %}
+                    <li class="nav-item"><a href="{% url 'accounts:register' %}" class="navbar-brand text-light">Register</a></li>
+                    <li class="nav-item"><a href="{% url 'accounts:login' %}" class="navbar-brand text-light">Login</a></li>
+                {% endif %}
+                    </ul>
                 </div>
             </div>
         </nav>
     </header>
 
-    <main class="container mt-5 flex-shrink-0" style="padding-top:60px;">
+    <main class="container mt-5 flex-shrink-0" style="padding-top:200px;">
         {% block content %}
             
         {% endblock %}
