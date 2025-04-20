@@ -41,7 +41,8 @@
                                 {% endif %} 
                             {% endfor %}
                         </div>
-                        <a href="{% url 'products:product_details' product.id %}" class="btn btn-primary stretched-link">More info here!</a>
+                        <a href="{% url 'products:product_details' product.id %}" class="btn btn-primary">More info</a>
+                        <a href="{% url 'products:cart_add' product.id %}" class="btn btn-primary mt-1">Add to cart</a>
                     </div>
                 </div>
             {% endfor %}

@@ -108,3 +108,6 @@ def confirm_email(request):
             login(request, user)
     return render(request, "confirm_email.html", context={"email":email})
 
+
+
+

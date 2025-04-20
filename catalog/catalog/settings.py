@@ -136,3 +136,5 @@ EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 # EMAIL_HOST_PASSWORD = "examplePassword"
 # EMAIL_USE_TLS = True
 # DEFAULT_FROM_EMAIL = "My shop example@gmail.com"
+
+CART_SESSION_ID = "cart"
