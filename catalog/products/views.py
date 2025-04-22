@@ -98,7 +98,6 @@ def cart_detail(request):
             cart = request.user.cart
         except Cart.DoesNotExist:
             cart = None
-
         if not cart or not cart.items.count():
             cart_items = []
             total_price = 0
