@@ -82,7 +82,7 @@ class Order(models.Model):
         return f"Order №: {self.id}"
     
     
-class OrderItem:
+class OrderItem(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='items', null=True)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     amount = models.PositiveIntegerField(default=1)
@@ -90,3 +90,21 @@ class OrderItem:
     
     def __str__(self):
         return f'{self.order.id} : {self.product.name} : ${self.price}'
+    
+class Payment(models.Model):
+    order = models.OneToOneField(Order, on_delete=models.CASCADE, related_name="payment")
+    provider = models.CharField(max_length=20, choices={
+        "liqpay": "LiqPay",
+        "monopay": "MonoPay",
+        "googlepay": "Google Pay",
+        })
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    class Status(models.IntegerChoices):
+        PENDING = 1
+        PAID = 2
+        FAILED = 3
+    status = models.IntegerField(choices=Status, default=Status.PENDING)
+    transaction_id = models.CharField(max_length=100, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    

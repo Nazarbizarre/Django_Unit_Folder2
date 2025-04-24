@@ -11,23 +11,17 @@ from django.conf import settings
 from .forms import RegisterForm, ProfileUpdateForm, RegisterFormNoCaptcha
 from .models import Profile
 from products.models import Cart, Product, CartItem
+from utils.email import send_email_confirm
 
 def register(request):
     if request.method == 'POST':
         form = RegisterForm(request.POST)
         if form.is_valid():
             request.session['form_data'] = request.POST.dict()
-            # user = form.save()
-            # login(request, user)
-            # return redirect("products:index")
-            new_email = form.cleaned_data.get("email")
-            confirm_url = request.build_absolute_uri(reverse("accounts:confirm_email"))
-            confirm_url += f"?email={new_email}"
-            subject = "Confirm New Email"
-            message = f"Hello, you want to confirm your email? " \
-                            f"To confirm this operation click on link: {confirm_url}"
-            send_mail(subject, message, from_email="noreply@gmail.com", recipient_list = [f"{new_email}"], fail_silently=False)
-            messages.info(request, "Confirmation Email Sent!")
+            user = form.save()
+            user.is_active = False
+            user.save()
+            send_email_confirm(request, user, user.email)
             return redirect("accounts:register")
     else:
         form = RegisterForm()
@@ -79,13 +73,7 @@ def edit_profile_view(request):
             # user.email = new_email
             # user.save()
             if new_email != user.email:
-                confirm_url = request.build_absolute_uri(reverse("accounts:confirm_email"))
-                confirm_url += f"?user={user.id}&email={new_email}"
-                subject = "Confirm New Email"
-                message = f"Hello, {user.username}, you want to change your email? " \
-                            f"To confirm this operation click on link: {confirm_url}"
-                send_mail(subject, message, from_email="noreply@gmail.com", recipient_list = [f"{new_email}"], fail_silently=False)
-                messages.info(request, "Confirmation Email Sent!")
+                send_email_confirm(request, user, new_email)
                 
             avatar= form.cleaned_data.get("avatar")
             if avatar:

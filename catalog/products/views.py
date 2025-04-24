@@ -3,8 +3,9 @@ from django.db.models import F, ExpressionWrapper, FloatField
 from django.conf import settings
 from django.contrib import messages
 
-from .models import Product, Category, Cart, CartItem, Order, OrderItem
+from .models import Product, Category, Cart, CartItem, Order, OrderItem, Payment
 from .forms import OrderCreateForm
+from utils.email import send_order_confirmation_email
 
 def calculate_discount(value, arg):
     return round((value * arg / 100), 2)
@@ -185,8 +186,7 @@ def checkout(request):
                 for product_id, amount in cart.items():
                     product = Product.objects.get(id=product_id)
                     cart_items.append({"product":product, "amount":amount})
-                    
-            OrderItem.objects.bulk_create(
+            items = OrderItem.objects.bulk_create(
                 [
                     OrderItem(
                         order=order,
@@ -199,16 +199,28 @@ def checkout(request):
                     for item in cart_items
                 ]
             )
-            if request.user.is_authentificated:
+            
+            total_price = sum(item.product.price*item.amount for item in items)
+            method = form.cleaned_data.get("payment_method")
+            if method != "cash":
+                Payment.objects.create(order=order, provider=method, amount=total_price)
+            else:
+                order.status = 2
+            
+            order.save()
+            
+            
+            if request.user.is_authenticated:
                 cart.items.all().delete()
             else:
                 request.session[settings.CART_SESSION_ID] = {}
+            send_order_confirmation_email(order=order)
             messages.success(request, 'Text')
             return redirect('products:index')
                 
 
 
         
-    return render(request="checkout.html", context={"form":form})
+    return render(request, "checkout.html", context={"form":form})
 
 
