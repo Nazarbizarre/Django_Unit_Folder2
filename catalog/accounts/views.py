@@ -43,7 +43,7 @@ def login_view(request):
             login(request, user)
             session_cart = request.session.get(settings.CART_SESSION_ID)
             if session_cart:
-                cart = Cart.objects.get_or_create(user=user)
+                cart, _ = Cart.objects.get_or_create(user=user)
                 for product_id, amount in session_cart.items():
                     product = Product.objects.get(id=product_id)
                     cart_item, created = CartItem.objects.get_or_create(cart=cart, product=product)

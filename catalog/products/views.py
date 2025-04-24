@@ -1,8 +1,13 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.db.models import F, ExpressionWrapper, FloatField
 from django.conf import settings
+from django.contrib import messages
 
-from .models import Product, Category, Cart, CartItem
+from .models import Product, Category, Cart, CartItem, Order, OrderItem
+from .forms import OrderCreateForm
+
+def calculate_discount(value, arg):
+    return round((value * arg / 100), 2)
 
 def index(request):
     products = Product.objects.all()
@@ -75,7 +80,7 @@ def cart_detail(request):
             if count == 0:
                 continue
             if product.discount:
-                raw_price = round(((product.price * product.discount) / 100), 2)
+                raw_price = calculate_discount(product.price, product.discount)
             else:
                 raw_price = product.price
             price = count * raw_price
@@ -111,7 +116,7 @@ def cart_detail(request):
                 if count == 0:
                     continue
                 if product.discount:
-                    raw_price = round(((product.price * product.discount) / 100), 2)
+                    raw_price = calculate_discount(product.price, product.discount)
                 else:
                     raw_price = product.price
                 price = count * raw_price
@@ -152,5 +157,58 @@ def cart_delete(request, product_id:int):
             cart_item.amount -= 1
             cart_item.save()
     return redirect("products:cart_detail")
+
+def checkout(request):
+    if (request.user.is_authenticated and not getattr(request.user, "cart", None)) or (
+        not request.user.is_authenticated and not request.session.get(settings.CART_SESSION_ID)
+        ):
+        messages.error(request, 'Cart is emplty')
+        return redirect('products:cart:detail')
+    if request.method == "GET":
+        form = OrderCreateForm()
+        if request.user.is_authenticated:
+            form.initial["contact_email"] = request.user.email
+    elif request.method == "POST":
+        form = OrderCreateForm(request.POST)
+        if form.is_valid():
+            order = form.save(commit=False)
+            if request.user.is_authenticated:
+                order.user = request.user
+            order.save()
+            
+            if request.user.is_authenticated:
+                cart = getattr(request.user, "cart")
+                cart_items = cart.items.select_related("product")
+            else:
+                cart = request.session.get(settings.CART_SESSION_ID)
+                cart_items = []
+                for product_id, amount in cart.items():
+                    product = Product.objects.get(id=product_id)
+                    cart_items.append({"product":product, "amount":amount})
+                    
+            OrderItem.objects.bulk_create(
+                [
+                    OrderItem(
+                        order=order,
+                        product=item.product,
+                        amount=item.amount,
+                        price=calculate_discount(
+                            item.product.price, item.product.discount
+                        ),
+                    )
+                    for item in cart_items
+                ]
+            )
+            if request.user.is_authentificated:
+                cart.items.all().delete()
+            else:
+                request.session[settings.CART_SESSION_ID] = {}
+            messages.success(request, 'Text')
+            return redirect('products:index')
+                
+
+
+        
+    return render(request="checkout.html", context={"form":form})
 
 

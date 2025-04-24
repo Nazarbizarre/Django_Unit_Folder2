@@ -58,3 +58,35 @@ class CartItem(models.Model):
     
     def __str__(self):
         return f"{self.product.name ," : ", self.amount}"
+    
+    
+class Order(models.Model):
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, related_name='orders', null=True)
+    contact_name = models.CharField(max_length=100)
+    contact_email = models.EmailField()
+    contact_phone = models.CharField(max_length=20)
+    address = models.TextField()
+    created_at = models. DateTimeField(auto_now_add=True)
+    
+    class Status(models.IntegerChoices):
+        NEW = 1
+        PROCESSING = 2
+        SHIPPED = 3
+        COMPLEATED = 4
+        CANCELLED = 5
+        
+    status = models.IntegerField(choices=Status, default=Status.NEW)
+    is_paid = models.BooleanField(default=False)
+    
+    def __str__(self):
+        return f"Order №: {self.id}"
+    
+    
+class OrderItem:
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='items', null=True)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    amount = models.PositiveIntegerField(default=1)
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+    
+    def __str__(self):
+        return f'{self.order.id} : {self.product.name} : ${self.price}'
