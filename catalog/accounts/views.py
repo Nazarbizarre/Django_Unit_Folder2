@@ -37,7 +37,8 @@ def login_view(request):
             login(request, user)
             session_cart = request.session.get(settings.CART_SESSION_ID)
             if session_cart:
-                cart, _ = Cart.objects.get_or_create(user=user)
+                cart = user.cart
+                # cart, _ = Cart.objects.get_or_create(user=user)
                 for product_id, amount in session_cart.items():
                     product = Product.objects.get(id=product_id)
                     cart_item, created = CartItem.objects.get_or_create(cart=cart, product=product)
@@ -59,13 +60,14 @@ def logout_user(request):
 
 @login_required
 def profile(request):
-    profile, _ = Profile.objects.get_or_create(user=request.user)
+    profile = request.user.profile
+    # profile, _ = Profile.objects.get_or_create(user=request.user)
     return render(request, 'profile.html', context={"profile":profile})
 
 @login_required
 def edit_profile_view(request):
     user = request.user
-    profile, _ = Profile.objects.get_or_create(user=request.user)
+    profile = user.profile
     if request.method == "POST":
         form = ProfileUpdateForm(request.POST, request.FILES, user=user)
         if form.is_valid():

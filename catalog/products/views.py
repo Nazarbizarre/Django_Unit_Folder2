@@ -136,7 +136,7 @@ def cart_add(request, product_id:int):
             cart[product_key] = 1
         request.session[settings.CART_SESSION_ID] = cart
     else:
-        cart, _ = Cart.objects.get_or_create(user=request.user)
+        cart = request.user.cart
         cart_item, created = CartItem.objects.get_or_create(cart=cart, product=product)
         if not created:
             cart_item.amount += 1
@@ -152,7 +152,7 @@ def cart_delete(request, product_id:int):
         cart[product_key] -= 1
         request.session[settings.CART_SESSION_ID] = cart
     else:
-        cart, _ = Cart.objects.get_or_create(user=request.user)
+        cart = request.user.cart
         cart_item, created = CartItem.objects.get_or_create(cart=cart, product=product)
         if not created:
             cart_item.amount -= 1
