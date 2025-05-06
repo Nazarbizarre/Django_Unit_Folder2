@@ -33,8 +33,9 @@ class Product(models.Model):
     discount = models.IntegerField(default=0)
     
     @property
-    def calculated_discount_price(self):
-        return (self.price * self.discount) / 100
+    def discount_price(self):
+        if self.discount:
+            return round(self.price - (self.price * self.discount / 100), 2)
     
     class Meta:
         ordering = ['-created_at']
@@ -47,14 +48,19 @@ class Product(models.Model):
     
 class Cart(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="cart")
-    created_at = models. DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+ 
     def __str__(self):
-        return f'{self.user.username}\'s cart'
+        return f"{self.user.username}'s cart"
     
 class CartItem(models.Model):
     cart = models.ForeignKey(Cart, on_delete=models.CASCADE, related_name='items')
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     amount = models.PositiveIntegerField(default=1)
+    
+    @property
+    def item_total(self):
+        return self.product.price * self.amount if not self.product.discount_price else self.product.discount_price * self.amount
     
     class Meta:
         unique_together = ("cart","product")

@@ -58,6 +58,7 @@
                     {% endfor %}
                 </table>
             </div>
+            <a href="{% url 'products:cart_add' product.id %}" class="btn btn-primary mt-1">Add to cart</a>
         </div>
     </div>
 {% endblock %}
